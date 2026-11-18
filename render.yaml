@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: fila-urbana
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.7
+      - key: FILA_URBANA_DB
+        value: data/fila_urbana.db
+      - key: AUTO_SEED
+        value: "1"
+      - key: FILA_URBANA_TOKEN_GESTOR
+        value: gestor

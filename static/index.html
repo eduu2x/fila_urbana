@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c2f2b">
+  <title>Fila Urbana</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">
+      <span class="simbolo">FU</span>
+      <div>
+        <h1>Fila Urbana</h1>
+        <p>Problemas da cidade priorizados com dados</p>
+      </div>
+    </div>
+    <div class="token-area">
+      <label for="token-gestor">Token do gestor</label>
+      <input id="token-gestor" type="password" autocomplete="off" spellcheck="false">
+      <span id="aviso-token" class="aviso-token">Ações de gestão liberadas</span>
+    </div>
+  </header>
+
+  <section class="faixa-estatisticas" id="faixa-estatisticas" aria-label="Estatísticas gerais">
+    <div class="cartao-estatistica"><span>Demandas abertas</span><strong>—</strong><small>carregando</small></div>
+    <div class="cartao-estatistica"><span>Em atraso</span><strong>—</strong><small>carregando</small></div>
+    <div class="cartao-estatistica"><span>Resolvidas</span><strong>—</strong><small>carregando</small></div>
+    <div class="cartao-estatistica"><span>Relatos</span><strong>—</strong><small>carregando</small></div>
+    <div class="cartao-estatistica"><span>Confirmações</span><strong>—</strong><small>carregando</small></div>
+  </section>
+
+  <nav class="abas" aria-label="Seções do sistema">
+    <button type="button" class="aba ativa" data-aba="mapa">Mapa e denúncia</button>
+    <button type="button" class="aba" data-aba="fila">Fila de prioridade</button>
+    <button type="button" class="aba" data-aba="agenda">Agenda</button>
+    <button type="button" class="aba" data-aba="garantia">Garantia</button>
+    <button type="button" class="aba" data-aba="revisoes">Revisões</button>
+    <button type="button" class="aba" data-aba="simulador">Simulador</button>
+  </nav>
+
+  <main>
+    <section class="painel ativo" id="painel-mapa">
+      <div class="layout-mapa">
+        <div class="bloco-mapa">
+          <div id="mapa" class="mapa" aria-label="Mapa de problemas urbanos"></div>
+          <div class="legenda" id="legenda" aria-label="Legenda de categorias"></div>
+        </div>
+        <aside class="cartao formulario">
+          <h2>Registrar problema</h2>
+          <p class="dica">Clique no mapa para escolher o local exato. Relatos próximos do mesmo tipo são agrupados.</p>
+          <form id="formulario-relato">
+            <div class="campo-duplo">
+              <label for="categoria">Categoria
+                <select id="categoria"></select>
+              </label>
+              <label for="regiao">Região
+                <select id="regiao"></select>
+              </label>
+            </div>
+            <label for="gravidade">
+              <span class="rotulo-gravidade">Gravidade <output id="saida-gravidade" for="gravidade">3</output></span>
+              <input id="gravidade" type="range" min="1" max="5" step="1" value="3">
+            </label>
+            <label for="descricao">Descrição
+              <textarea id="descricao" maxlength="500" rows="3" placeholder="Ex.: buraco fundo na faixa da direita"></textarea>
+            </label>
+            <fieldset>
+              <legend>Entorno do local</legend>
+              <div id="entornos" class="opcoes-entorno"></div>
+            </fieldset>
+            <div class="campo-duplo">
+              <label for="latitude">Latitude
+                <input id="latitude" type="number" step="0.0001" min="-90" max="90" required>
+              </label>
+              <label for="longitude">Longitude
+                <input id="longitude" type="number" step="0.0001" min="-180" max="180" required>
+              </label>
+            </div>
+            <div class="acoes-formulario">
+              <button type="button" class="botao secundario" id="botao-localizacao">Usar minha localização</button>
+              <button type="submit" class="botao primario">Enviar relato</button>
+            </div>
+            <p id="mensagem-relato" class="mensagem" role="status" aria-live="polite"></p>
+          </form>
+        </aside>
+      </div>
+    </section>
+
+    <section class="painel" id="painel-fila">
+      <div class="cabecalho-painel">
+        <div>
+          <h2>Fila de prioridade</h2>
+          <p>O score é recalculado na leitura a partir de gravidade, risco, tempo, confirmações, recorrência e categoria.</p>
+        </div>
+        <div class="filtros">
+          <label for="filtro-regiao-fila">Região
+            <select id="filtro-regiao-fila"></select>
+          </label>
+          <button type="button" class="botao secundario" id="botao-atualizar-fila">Atualizar</button>
+        </div>
+      </div>
+      <p id="fila-resumo" class="texto-suave"></p>
+      <div class="area-tabela" id="tabela-fila"><div class="vazio">Carregando fila...</div></div>
+    </section>
+
+    <section class="painel" id="painel-agenda">
+      <div class="cabecalho-painel">
+        <div>
+          <h2>Agenda por prazo</h2>
+          <p>Ordenação por intercalação e busca binária separam demandas atrasadas dos vencimentos do período.</p>
+        </div>
+        <div class="filtros">
+          <label for="dias-agenda">Próximos dias
+            <input id="dias-agenda" type="number" min="1" max="90" value="7">
+          </label>
+          <button type="button" class="botao secundario" id="botao-atualizar-agenda">Atualizar</button>
+        </div>
+      </div>
+      <div class="faixa-resumo" id="agenda-resumo"></div>
+      <div class="bloco-lista">
+        <h3>Atrasadas <span class="texto-suave" id="contagem-atrasadas"></span></h3>
+        <div class="area-tabela" id="agenda-atrasadas"><div class="vazio">Carregando agenda...</div></div>
+      </div>
+      <div class="bloco-lista">
+        <h3>Próximas do prazo</h3>
+        <div class="area-tabela" id="agenda-proximas"></div>
+      </div>
+    </section>
+
+    <section class="painel" id="painel-garantia">
+      <div class="cabecalho-painel">
+        <div>
+          <h2>Garantia de atendimento</h2>
+          <p>Demandas com mais de duas vezes o SLA da categoria e sem resolução registrada.</p>
+        </div>
+      </div>
+      <div class="faixa-resumo" id="garantia-resumo"></div>
+      <div class="area-tabela" id="tabela-garantia"><div class="vazio">Carregando garantia...</div></div>
+    </section>
+
+    <section class="painel" id="painel-revisoes">
+      <div class="cabecalho-painel">
+        <div>
+          <h2>Revisões de classificação</h2>
+          <p>Relatos com baixa confiança entram em uma fila FIFO para conferência do gestor.</p>
+        </div>
+      </div>
+      <div class="faixa-resumo" id="revisoes-resumo"></div>
+      <div class="area-tabela" id="tabela-revisoes"><div class="vazio">Carregando revisões...</div></div>
+    </section>
+
+    <section class="painel" id="painel-simulador">
+      <div class="cabecalho-painel">
+        <div>
+          <h2>Simulador de pesos</h2>
+          <p>Altere a importância de cada componente e veja o Top 10 recalculado sem gravar nada no banco.</p>
+        </div>
+      </div>
+      <div class="layout-simulador">
+        <form class="cartao" id="formulario-simulacao">
+          <h3>Pesos dos componentes</h3>
+          <p class="dica">Os valores são normalizados para somar 100%.</p>
+          <div id="pesos-simulacao"></div>
+          <div class="acoes-formulario">
+            <button type="submit" class="botao primario">Recalcular fila</button>
+            <button type="button" class="botao secundario" id="botao-restaurar-pesos">Restaurar padrão</button>
+          </div>
+        </form>
+        <div>
+          <div class="cartao resumo-simulacao" id="resumo-simulacao">Ajuste os pesos e clique em recalcular.</div>
+          <div class="area-tabela" id="tabela-simulacao"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p><strong>Fila Urbana</strong> · projeto acadêmico de Estruturas de Dados e Algoritmos · FastAPI, SQLite e Leaflet</p>
+  </footer>
+
+  <div class="modal escondido" id="modal" role="dialog" aria-modal="true" aria-label="Detalhe da demanda">
+    <div class="conteudo-modal">
+      <button type="button" class="fechar" id="fechar-modal" aria-label="Fechar detalhe">×</button>
+      <div id="corpo-modal"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <noscript>Ative o JavaScript para usar o mapa, a fila e o simulador.</noscript>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
