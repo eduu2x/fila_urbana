@@ -202,7 +202,7 @@ O site está publicado no Render:
 - Comando de start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1`
 - Variáveis: `FILA_URBANA_DB=data/fila_urbana.db`, `AUTO_SEED=1` e `FILA_URBANA_TOKEN_GESTOR`
 
-Cada push na branch `main` publica uma nova versão. O plano free usa disco efêmero: o SQLite pode ser recriado a cada deploy, reinício ou spin-down. Com `AUTO_SEED=1`, um banco vazio é semeado novamente, o que serve para demonstração. Para persistência real, seria necessário um disco persistente ou um banco gerenciado.
+Com o auto-deploy ligado, cada push na branch `main` publica uma nova versão. Também é possível usar **Manual Deploy → Deploy latest commit** no painel do Render. O plano free usa disco efêmero: o SQLite pode ser recriado a cada deploy, reinício ou spin-down. Com `AUTO_SEED=1`, um banco vazio é semeado novamente, o que serve para demonstração. Para persistência real, seria necessário um disco persistente ou um banco gerenciado.
 
 ## Limitações
 
