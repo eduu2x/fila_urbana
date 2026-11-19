@@ -179,6 +179,14 @@ def raiz():
     return FileResponse(PASTA_STATIC / "index.html")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def icone():
+    return FileResponse(
+        PASTA_STATIC / "favicon.svg",
+        media_type="image/svg+xml",
+    )
+
+
 app.mount(
     "/static",
     StaticFiles(directory=str(PASTA_STATIC)),

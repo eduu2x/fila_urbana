@@ -508,7 +508,16 @@ def test_pagina_inicial(cliente):
 def test_arquivos_estaticos(cliente):
     estilo = cliente.get("/static/estilo.css")
     aplicacao = cliente.get("/static/app.js")
+    icone = cliente.get("/static/favicon.svg")
     assert estilo.status_code == 200
     assert "text/css" in estilo.headers["content-type"]
     assert aplicacao.status_code == 200
     assert "javascript" in aplicacao.headers["content-type"]
+    assert icone.status_code == 200
+    assert "image/svg+xml" in icone.headers["content-type"]
+
+
+def test_favicon(cliente):
+    resposta = cliente.get("/favicon.ico")
+    assert resposta.status_code == 200
+    assert "image/svg+xml" in resposta.headers["content-type"]
