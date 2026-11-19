@@ -4,7 +4,7 @@ Mapa colaborativo de problemas urbanos com fila de prioridade explicável.
 
 **Site:** [fila-urbana.onrender.com](https://fila-urbana.onrender.com)  
 **Documentação da API:** [fila-urbana.onrender.com/docs](https://fila-urbana.onrender.com/docs)  
-**Testes:** 75 passando  
+**Testes:** 76 passando  
 **Projeto acadêmico:** Estruturas de Dados e Algoritmos
 
 ![Mapa do Fila Urbana](docs/captura-mapa.jpg)
@@ -75,7 +75,7 @@ pytest
 O token é uma senha simples da equipe, não um login. Ele libera as ações de gestão, como mudar o status de uma demanda e concluir uma revisão. O cidadão não precisa dele para registrar ou confirmar problemas.
 
 - No servidor, o token fica na variável `FILA_URBANA_TOKEN_GESTOR` e não tem valor padrão. Sem essa variável, as ações de gestão ficam bloqueadas.
-- No site, o campo **Token do gestor** fica vazio no topo da página. A pessoa digita ali o mesmo valor configurado no servidor. O valor fica apenas na sessão do navegador.
+- No site, o campo **Token do gestor** fica vazio no topo da página. Digite o valor e clique em **Validar**; o site confirma na hora se o token é válido, sem alterar nenhum dado. O valor fica apenas na sessão do navegador.
 - No Render, o caminho é **serviço → Environment → FILA_URBANA_TOKEN_GESTOR → editar → salvar**. O `render.yaml` usa `sync: false`, então o segredo não fica no repositório e não é sobrescrito pelo Blueprint.
 - Em uso real, use um valor forte e exclusivo da equipe. O token é uma simplificação acadêmica; um sistema público precisaria de login, perfis e auditoria.
 
@@ -126,6 +126,7 @@ Base: `/api`. A interface e a API são servidas pela mesma origem, então não h
 | Método | Rota | Descrição |
 |---|---|---|
 | `GET` | `/api/saude` | Saúde e versão |
+| `POST` | `/api/gestor/verificar` | Valida o token do gestor, sem alterar dados |
 | `GET` | `/api/categorias` | Categorias, prazos, entornos, regiões, pesos e centro do mapa |
 | `POST` | `/api/relatos` | Cria um relato ou adiciona a uma demanda próxima |
 | `GET` | `/api/demandas` | Lista com filtros de status, categoria e região |
@@ -181,14 +182,14 @@ O heap, a ordenação por intercalação e a busca binária foram implementados 
 pytest
 ```
 
-A suíte tem 75 testes:
+A suíte tem 76 testes:
 
 - `test_estruturas.py`: heap, FIFO, ordenação por intercalação e busca binária.
 - `test_classificacao.py`: palavras-chave, acentos, confiança e caso sem categoria.
 - `test_prioridade.py`: pesos, fórmulas, saturações e efeito dos componentes.
 - `test_utilidades.py`: datas, distância, células e normalização de texto.
 - `test_servicos.py`: desempate da fila.
-- `test_api.py`: saúde, categorias, criação, agrupamento, confirmações, autorização, status, filtros, top, mapa, agenda, garantia, estatísticas, revisões, simulação, arquivos estáticos e favicon.
+- `test_api.py`: saúde, categorias, criação, agrupamento, confirmações, autorização, verificação do token, status, filtros, top, mapa, agenda, garantia, estatísticas, revisões, simulação, arquivos estáticos e favicon.
 
 Cada teste de API usa um banco temporário isolado. O seed não roda automaticamente nos testes.
 

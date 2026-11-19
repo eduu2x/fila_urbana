@@ -108,9 +108,38 @@ a {
   color: #ffffff;
 }
 
+.token-controle {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.token-controle input {
+  flex: 1;
+  min-width: 0;
+}
+
+.token-controle .botao {
+  white-space: nowrap;
+}
+
 .aviso-token {
   font-size: 0.7rem;
   color: #8fd0ba;
+}
+
+.aviso-token.valido {
+  color: #8fd0ba;
+  font-weight: 600;
+}
+
+.aviso-token.invalido {
+  color: #ffb4a8;
+  font-weight: 600;
+}
+
+.aviso-token.verificando {
+  color: #f0d38a;
 }
 
 .faixa-estatisticas {

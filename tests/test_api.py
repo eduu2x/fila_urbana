@@ -216,6 +216,22 @@ def test_limite_de_confirmacoes(cliente):
     assert excedente.status_code == 409
 
 
+def test_verificar_token_gestor(cliente):
+    caminho = "/api/gestor/verificar"
+    assert cliente.post(caminho).status_code == 401
+    assert cliente.post(
+        caminho,
+        headers={"X-Token-Gestor": ""},
+    ).status_code == 401
+    assert cliente.post(
+        caminho,
+        headers={"X-Token-Gestor": "errado"},
+    ).status_code == 401
+    resposta = cliente.post(caminho, headers=CABECALHO_GESTOR)
+    assert resposta.status_code == 200
+    assert resposta.json() == {"valido": True}
+
+
 def test_status_exige_token(cliente):
     identificador = criar_identificador(cliente)
     corpo = {"status": "em_analise"}

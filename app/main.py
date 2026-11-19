@@ -68,6 +68,14 @@ def saude():
     return {"status": "ok", "versao": "0.1.0"}
 
 
+@app.post(
+    "/api/gestor/verificar",
+    dependencies=[Depends(verificar_gestor)],
+)
+def verificar_token_gestor():
+    return {"valido": True}
+
+
 @app.get("/api/categorias")
 def categorias():
     return obter_categorias()

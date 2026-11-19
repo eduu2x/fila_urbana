@@ -101,20 +101,75 @@ function configurarAbas() {
 
 function configurarToken() {
   const campo = document.getElementById("token-gestor");
+  const botao = document.getElementById("validar-token");
   campo.value = sessionStorage.getItem("filaUrbanaTokenGestor") || "";
-  atualizarAvisoToken();
   campo.addEventListener("input", () => {
     sessionStorage.setItem("filaUrbanaTokenGestor", campo.value);
-    atualizarAvisoToken();
+    marcarTokenPendente();
   });
+  campo.addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter") {
+      evento.preventDefault();
+      validarToken();
+    }
+  });
+  botao.addEventListener("click", () => validarToken());
+  if (campo.value.trim()) {
+    validarToken(true);
+  } else {
+    marcarTokenPendente();
+  }
 }
 
-function atualizarAvisoToken() {
+function marcarTokenPendente() {
   const campo = document.getElementById("token-gestor");
   const aviso = document.getElementById("aviso-token");
+  aviso.className = "aviso-token";
   aviso.textContent = campo.value.trim()
-    ? "Token informado nesta sessão"
-    : "Informe o token para ações de gestão";
+    ? "Token não verificado — clique em Validar"
+    : "Digite o token e clique em Validar";
+}
+
+async function validarToken(silencioso = false) {
+  const campo = document.getElementById("token-gestor");
+  const aviso = document.getElementById("aviso-token");
+  const botao = document.getElementById("validar-token");
+  const token = campo.value.trim();
+  if (!token) {
+    aviso.className = "aviso-token invalido";
+    aviso.textContent = "Informe o token para ações de gestão";
+    if (!silencioso) {
+      mostrarToast("Informe o token do gestor.", "erro");
+    }
+    return;
+  }
+  botao.disabled = true;
+  aviso.className = "aviso-token verificando";
+  aviso.textContent = "Verificando token...";
+  try {
+    await pedir("/gestor/verificar", {
+      method: "POST",
+      headers: { "X-Token-Gestor": token },
+    });
+    if (campo.value.trim() !== token) {
+      return;
+    }
+    aviso.className = "aviso-token valido";
+    aviso.textContent = "Token válido — ações de gestão liberadas";
+    if (!silencioso) {
+      mostrarToast("Token válido. Ações de gestão liberadas.", "sucesso");
+    }
+  } catch (erro) {
+    if (campo.value.trim() === token) {
+      aviso.className = "aviso-token invalido";
+      aviso.textContent = "Token inválido — confira o valor";
+      if (!silencioso) {
+        mostrarToast(erro.message, "erro");
+      }
+    }
+  } finally {
+    botao.disabled = false;
+  }
 }
 
 function obterTokenGestor() {
