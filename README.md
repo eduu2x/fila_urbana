@@ -1,52 +1,93 @@
 # Fila Urbana
 
-Mapa colaborativo de problemas urbanos com fila de prioridade explicável.
+Mapa colaborativo de problemas urbanos com fila de prioridade.
 
-**Site:** [fila-urbana.onrender.com](https://fila-urbana.onrender.com)  
-**Documentação da API:** [fila-urbana.onrender.com/docs](https://fila-urbana.onrender.com/docs)  
-**Testes:** 76 passando  
-**Projeto acadêmico:** Estruturas de Dados e Algoritmos
+- **Site:** [fila-urbana.onrender.com](https://fila-urbana.onrender.com)
+- **Documentação:** [fila-urbana.onrender.com/docs](https://fila-urbana.onrender.com/docs)
+- **Testes:** 76 passando
+- **Projeto:** Estruturas de Dados e Algoritmos
 
 ![Mapa do Fila Urbana](docs/captura-mapa.jpg)
 
-O cidadão registra buracos, falhas de iluminação, descarte irregular de lixo, sinalização danificada e problemas de drenagem. O sistema agrupa relatos próximos do mesmo tipo, classifica o texto por palavras-chave, calcula uma nota de urgência e entrega ao gestor uma fila ordenada, com prazo, componentes da nota e histórico de decisões.
+O Fila Urbana é um projeto acadêmico. A ideia é simples: o cidadão aponta um problema no mapa e o sistema organiza o que deve ser resolvido primeiro. Por baixo, usa Python, FastAPI, SQLite, Leaflet e JavaScript puro, sem Node, React, ORM ou Docker.
 
-## Como funciona
+## Resumo
 
-1. **O cidadão marca o problema no mapa.** Escolhe o local, a categoria, a gravidade, os arredores e escreve uma descrição.
-2. **O sistema junta relatos parecidos.** Se alguém já registrou o mesmo tipo de problema em até 50 metros e nos últimos 30 dias, o novo relato é somado à ocorrência existente, em vez de duplicá-la.
-3. **O texto é classificado.** Uma tabela de palavras-chave sugere a categoria e informa o grau de confiança. Relatos com baixa confiança entram numa fila de revisão.
-4. **Cada problema recebe uma nota de urgência.** A nota considera gravidade, risco do entorno, tempo em aberto, confirmações, recorrência e a prioridade da categoria.
-5. **O gestor vê a fila.** Os problemas mais urgentes aparecem primeiro, com prazo, mapa, relatos agrupados e histórico.
-6. **O atendimento é acompanhado.** O gestor muda o status, o cidadão confirma problemas existentes e a agenda mostra o que está atrasado ou perto do prazo.
+Pense no sistema como um mapa da cidade com uma lista de tarefas que se organiza sozinha. Cada problema recebe uma nota de urgência. Os mais graves, antigos ou confirmados por mais gente sobem na fila. O gestor vê essa fila, acompanha prazos e atualiza o andamento.
 
-## O que dá para fazer
+## Funcionamento
 
-- Registrar um problema anonimamente, direto no mapa.
-- Agrupar denúncias próximas e evitar registros repetidos.
-- Classificar automaticamente o relato e revisar os casos duvidosos.
-- Consultar a fila de prioridade, com filtro por região.
-- Ver a agenda por prazo, as demandas atrasadas e a garantia de atendimento.
-- Confirmar um problema existente, com limite por dispositivo.
-- Acompanhar o detalhe de cada demanda, com componentes da nota e histórico.
-- Simular outros pesos e ver o Top 10 recalculado sem alterar o banco.
-- Acessar tudo pelo celular ou pelo computador, sem instalar nada.
+1. **Registro.** A pessoa abre o site, marca o local no mapa, escolhe a categoria, a gravidade e os arredores, e escreve uma descrição. Não precisa de cadastro.
+2. **Agrupamento.** Se já existe um problema do mesmo tipo em até 50 metros e nos últimos 30 dias, o novo relato é somado ao existente. Assim, vinte buracos iguais viram um problema com vinte relatos, em vez de vinte problemas separados.
+3. **Classificação.** O sistema lê palavras-chave da descrição e tenta descobrir a categoria. Ele mostra o grau de confiança; quando fica em dúvida, o caso vai para a fila de revisão.
+4. **Nota.** Cada problema ganha uma nota de 0 a 100. A conta considera gravidade, risco do entorno, tempo em aberto, confirmações, recorrência e a prioridade da categoria.
+5. **Fila.** O gestor vê os problemas mais urgentes primeiro, com prazo, mapa, relatos e histórico. Pode marcar como em análise, em execução ou resolvido.
+6. **Acompanhamento.** A agenda mostra o que está atrasado ou perto do prazo. A aba de garantia destaca os casos muito acima do prazo. A população também pode confirmar problemas existentes.
+
+## Recursos
+
+- Registrar problemas anonimamente pelo mapa.
+- Juntar relatos parecidos e evitar duplicidade.
+- Classificar o texto e revisar os casos duvidosos.
+- Consultar a fila por prioridade e por região.
+- Acompanhar prazos, atrasos e garantia de atendimento.
+- Confirmar problemas existentes.
+- Ver o detalhe de cada demanda, com a nota e o histórico.
+- Simular outros critérios e ver o Top 10 recalculado.
+- Usar no celular ou no computador, sem instalar nada.
 
 ## Tecnologias
 
 | Camada | Ferramenta |
 |---|---|
-| Backend | Python 3.13.7 e FastAPI 0.165.0 |
-| Servidor | Uvicorn 0.54.0, com um worker |
-| Banco | SQLite 3, usando `sqlite3` e sem ORM |
-| Frontend | HTML, CSS e JavaScript puro, sem build |
-| Mapa | Leaflet 1.9.4 e OpenStreetMap via CDN |
-| Testes | pytest 9.2.0 e httpx 0.28.1 |
-| Deploy | Render, runtime Python e plano free |
+| Backend | Python, FastAPI e Uvicorn |
+| Banco | SQLite, sem ORM |
+| Frontend | HTML, CSS e JavaScript puro |
+| Mapa | Leaflet e OpenStreetMap |
+| Testes | pytest |
+| Deploy | Render, plano free |
 
-Fora da stack: Node, npm, React, Vite, Tailwind, ORM, Docker, Redis, Celery e banco externo.
+Fora da stack: Node, React, ORM, Docker, Redis e banco externo.
 
-## Rodando localmente
+## Dados
+
+- O banco é um arquivo SQLite com tabelas para demandas, relatos, confirmações, eventos e histórico da nota.
+- O agrupamento usa uma grade de coordenadas e confere a distância real com a fórmula de haversine. O raio é de 50 metros e a janela é de 30 dias.
+- Uma confirmação vale para uma demanda por dispositivo por dia, em um raio de 200 metros. Cada demanda aceita até 20 confirmações.
+- O seed é determinístico e cria 185 demandas, 441 relatos e 1.710 confirmações para demonstração.
+- Não há login, foto, IP armazenado ou identificação civil. As coordenadas retornadas pela API são arredondadas.
+
+## Prioridade
+
+A nota é calculada assim:
+
+```text
+nota = 100 × soma(peso × componente)
+```
+
+| Componente | Peso |
+|---|---:|
+| Gravidade | 30% |
+| Risco | 20% |
+| Tempo | 20% |
+| Confirmações | 15% |
+| Recorrência | 10% |
+| Categoria | 5% |
+
+Prazos por categoria: buraco 7 dias, iluminação 5, lixo 3, sinalização 10, drenagem 5 e outros 15.
+
+Os pesos são normalizados para somar 1. O desempate é: maior nota, menor prazo e menor identificador. A nota é recalculada na leitura, então a fila não fica presa a um valor antigo.
+
+## Estruturas
+
+- **Heap binário máximo:** mantém a fila de prioridade e o Top 10 do simulador. Foi implementado à mão, sem biblioteca pronta.
+- **Ordenação por intercalação:** ordena a agenda e a garantia.
+- **Busca binária:** encontra o corte de datas na agenda.
+- **Fila FIFO:** organiza os relatos que precisam de revisão, usando `deque`.
+- **Dicionários:** guardam categorias, palavras-chave, pesos, riscos e transições.
+- **Índices SQLite:** aceleram as buscas por célula, status, região e relacionamentos.
+
+## Execução
 
 ```bash
 git clone https://github.com/eduu2x/fila_urbana.git
@@ -59,9 +100,7 @@ python scripts/semear.py --limpar
 uvicorn app.main:app --reload --workers 1
 ```
 
-Acesse `http://127.0.0.1:8000`.
-
-O seed determinístico cria 185 demandas, 441 relatos e 1.710 confirmações. Sem `--limpar`, ele só popula um banco vazio. A documentação interativa fica em `http://127.0.0.1:8000/docs`.
+Acesse `http://127.0.0.1:8000`. A documentação interativa fica em `/docs`.
 
 Para rodar os testes:
 
@@ -70,128 +109,48 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-## Token do gestor
+## Testes
 
-O token é uma senha simples da equipe, não um login. Ele libera as ações de gestão, como mudar o status de uma demanda e concluir uma revisão. O cidadão não precisa dele para registrar ou confirmar problemas.
+A suíte tem 76 testes:
 
-- No servidor, o token fica na variável `FILA_URBANA_TOKEN_GESTOR` e não tem valor padrão. Sem essa variável, as ações de gestão ficam bloqueadas.
-- No site, o campo **Token do gestor** fica vazio no topo da página. Digite o valor e clique em **Validar**; o site confirma na hora se o token é válido, sem alterar nenhum dado. O valor fica apenas na sessão do navegador.
-- No Render, o caminho é **serviço → Environment → FILA_URBANA_TOKEN_GESTOR → editar → salvar**. O `render.yaml` usa `sync: false`, então o segredo não fica no repositório e não é sobrescrito pelo Blueprint.
-- Em uso real, use um valor forte e exclusivo da equipe. O token é uma simplificação acadêmica; um sistema público precisaria de login, perfis e auditoria.
+- Estruturas: heap, FIFO, ordenação por intercalação e busca binária.
+- Classificação: palavras-chave, acentos, confiança e caso sem categoria.
+- Prioridade: pesos, fórmulas, saturações e efeito dos componentes.
+- Utilidades: datas, distância, células e normalização de texto.
+- Serviços: desempate da fila.
+- API: saúde, categorias, criação, agrupamento, confirmações, autorização, verificação do token, status, filtros, top, mapa, agenda, garantia, estatísticas, revisões, simulação, arquivos estáticos e favicon.
 
-## Estrutura
-
-```text
-fila_urbana/
-  app/
-    banco.py
-    classificacao.py
-    config.py
-    estruturas.py
-    main.py
-    modelos.py
-    prioridade.py
-    semeador.py
-    servicos.py
-    utilidades.py
-  docs/
-    captura-mapa.jpg
-  scripts/
-    semear.py
-  static/
-    app.js
-    estilo.css
-    favicon.svg
-    index.html
-  tests/
-    conftest.py
-    test_api.py
-    test_classificacao.py
-    test_estruturas.py
-    test_prioridade.py
-    test_servicos.py
-    test_utilidades.py
-  data/
-  pytest.ini
-  render.yaml
-  requirements.txt
-  requirements-dev.txt
-  README.md
-```
+Cada teste de API usa um banco temporário isolado. O seed não roda nos testes.
 
 ## API
 
-Base: `/api`. A interface e a API são servidas pela mesma origem, então não há CORS.
+Base: `/api`.
 
 | Método | Rota | Descrição |
 |---|---|---|
 | `GET` | `/api/saude` | Saúde e versão |
-| `POST` | `/api/gestor/verificar` | Valida o token do gestor, sem alterar dados |
-| `GET` | `/api/categorias` | Categorias, prazos, entornos, regiões, pesos e centro do mapa |
-| `POST` | `/api/relatos` | Cria um relato ou adiciona a uma demanda próxima |
-| `GET` | `/api/demandas` | Lista com filtros de status, categoria e região |
-| `GET` | `/api/demandas/top` | Fila priorizada, com `limite` e `regiao` |
-| `GET` | `/api/demandas/{id}` | Detalhe com relatos, eventos e histórico |
-| `POST` | `/api/demandas/{id}/confirmacoes` | Confirma uma demanda |
-| `PATCH` | `/api/demandas/{id}/status` | Atualiza o status; exige token de gestor |
-| `GET` | `/api/mapa` | Pontos abertos, com `limite` e bounding box opcional |
-| `GET` | `/api/agenda` | Atrasadas e vencimentos, com `dias` e `limite` |
-| `GET` | `/api/garantia` | Demandas acima de 2× o prazo da categoria |
-| `GET` | `/api/estatisticas` | Contagens por categoria, região e status |
-| `GET` | `/api/revisoes` | Fila FIFO de relatos com baixa confiança |
-| `POST` | `/api/revisoes/{id}/concluir` | Conclui uma revisão; exige token de gestor |
-| `POST` | `/api/simulacao` | Recalcula o Top 10 com outros pesos, sem gravar |
+| `POST` | `/api/gestor/verificar` | Valida o token do gestor |
+| `GET` | `/api/categorias` | Categorias, prazos e pesos |
+| `POST` | `/api/relatos` | Cria um relato ou soma a uma demanda próxima |
+| `GET` | `/api/demandas` | Lista com filtros |
+| `GET` | `/api/demandas/top` | Fila priorizada |
+| `GET` | `/api/demandas/{id}` | Detalhe da demanda |
+| `PATCH` | `/api/demandas/{id}/status` | Atualiza o status; exige token |
+| `GET` | `/api/agenda` | Atrasadas e vencimentos |
+| `GET` | `/api/garantia` | Casos acima de 2× o prazo |
+| `GET` | `/api/revisoes` | Fila de revisão |
+| `POST` | `/api/simulacao` | Recalcula o Top 10 sem gravar |
 
 Erros de validação retornam `422`; regra de negócio, `400`; não encontrado, `404`; token inválido, `401`; conflito de confirmação, `409`.
 
-## Score de prioridade
+## Token
 
-```text
-score = 100 × Σ (peso_normalizado × componente)
-```
+O token é uma senha simples da equipe, não um login. Ele libera as ações de gestão, como mudar o status de uma demanda e concluir uma revisão. O cidadão não precisa dele para registrar ou confirmar problemas.
 
-| Componente | Peso | Normalização |
-|---|---:|---|
-| Gravidade | 30% | `(gravidade - 1) / 4` |
-| Risco | 20% | risco da categoria + riscos do entorno, limitado a 1 |
-| Tempo | 20% | dias em aberto divididos por 2 × prazo, limitado a 1 |
-| Confirmações | 15% | `confirmacoes / (confirmacoes + 3)` |
-| Recorrência | 10% | ocorrências em 90 dias divididas por 10, limitado a 1 |
-| Categoria | 5% | prioridade própria da categoria |
-
-Prazos por categoria: buraco 7 dias, iluminação 5, lixo 3, sinalização 10, drenagem 5 e outros 15.
-
-Os pesos são normalizados para somar 1. Valores inválidos são descartados; se todos forem zero, os pesos padrão voltam. O desempate da fila é: maior score, menor prazo e menor identificador.
-
-## Estruturas de dados
-
-| Estrutura | Uso |
-|---|---|
-| Heap binário máximo próprio | Fila de prioridade e Top 10 do simulador |
-| Ordenação por intercalação | Agenda e garantia |
-| Busca binária | Corte da agenda por data |
-| Fila FIFO com `deque` | Revisões de classificação |
-| Dicionários | Categorias, palavras-chave, pesos, riscos e transições |
-| Índices SQLite | Célula, status, região e relacionamentos |
-
-O heap, a ordenação por intercalação e a busca binária foram implementados em `app/estruturas.py`, sem biblioteca pronta.
-
-## Testes
-
-```bash
-pytest
-```
-
-A suíte tem 76 testes:
-
-- `test_estruturas.py`: heap, FIFO, ordenação por intercalação e busca binária.
-- `test_classificacao.py`: palavras-chave, acentos, confiança e caso sem categoria.
-- `test_prioridade.py`: pesos, fórmulas, saturações e efeito dos componentes.
-- `test_utilidades.py`: datas, distância, células e normalização de texto.
-- `test_servicos.py`: desempate da fila.
-- `test_api.py`: saúde, categorias, criação, agrupamento, confirmações, autorização, verificação do token, status, filtros, top, mapa, agenda, garantia, estatísticas, revisões, simulação, arquivos estáticos e favicon.
-
-Cada teste de API usa um banco temporário isolado. O seed não roda automaticamente nos testes.
+- No servidor, o token fica na variável `FILA_URBANA_TOKEN_GESTOR` e não tem valor padrão. Sem essa variável, as ações de gestão ficam bloqueadas.
+- No site, o campo **Token do gestor** fica no topo. Digite o valor e clique em **Validar**; o site confirma na hora se o token é válido, sem alterar nenhum dado.
+- No Render, o caminho é **serviço → Environment → FILA_URBANA_TOKEN_GESTOR → editar → salvar**. O `render.yaml` usa `sync: false`, então o segredo não fica no repositório e não é sobrescrito pelo Blueprint.
+- Em uso real, use um valor forte e exclusivo da equipe. O token é uma simplificação acadêmica; um sistema público precisaria de login, perfis e auditoria.
 
 ## Deploy
 
@@ -199,75 +158,22 @@ O site está publicado no Render:
 
 - URL: https://fila-urbana.onrender.com
 - Health check: https://fila-urbana.onrender.com/api/saude
-- Configuração: `render.yaml`
-- Comando de build: `pip install -r requirements.txt`
-- Comando de start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1`
-- Variáveis: `FILA_URBANA_DB=data/fila_urbana.db`, `AUTO_SEED=1` e `FILA_URBANA_TOKEN_GESTOR` (definida manualmente no painel, com `sync: false`)
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1`
+- Variáveis: `FILA_URBANA_DB`, `AUTO_SEED=1` e `FILA_URBANA_TOKEN_GESTOR`
 
-Com o auto-deploy ligado, cada push na branch `main` publica uma nova versão. Também é possível usar **Manual Deploy → Deploy latest commit** no painel do Render. O plano free usa disco efêmero: o SQLite pode ser recriado a cada deploy, reinício ou spin-down. Com `AUTO_SEED=1`, um banco vazio é semeado novamente, o que serve para demonstração. Para persistência real, seria necessário um disco persistente ou um banco gerenciado.
+Se o auto-deploy estiver ligado, cada push na branch `main` publica uma nova versão. Também é possível usar **Manual Deploy → Deploy latest commit**. O plano free usa disco efêmero: o SQLite pode ser recriado a cada deploy, reinício ou spin-down. Com `AUTO_SEED=1`, um banco vazio é semeado novamente, o que serve para demonstração.
 
 ## Limitações
 
 O projeto é um piloto de uma cidade, com base sintética. A classificação é lexical e explicável, não aprende sozinha. A fila é uma recomendação de prioridade, não uma decisão automática de política pública. Ficam fora do MVP: fotos, notificações, aplicativo nativo, autenticação institucional, integração com sistemas da prefeitura, múltiplas cidades e antifraude real.
 
-<details>
-<summary>Detalhes técnicos</summary>
-
-### Agrupamento e grade
-
-Um relato entra em uma demanda existente quando a categoria é a mesma, a demanda não está resolvida, a última ocorrência foi há no máximo 30 dias e a distância até o centroide é de no máximo 50 metros.
-
-A busca usa uma grade de passo `0,002°` com `math.floor` e consulta as nove células ao redor. A distância real é confirmada por haversine. A metade da menor célula da grade é maior que o raio de 50 metros, então as nove células cobrem todos os candidatos.
-
-### Modelo de dados
-
-| Tabela | Conteúdo |
-|---|---|
-| `demandas` | Agregado de relatos, centroide, célula, categoria, gravidade, prazo, status, confirmações, reaberturas e último score |
-| `relatos` | Denúncia individual, categoria escolhida, categoria sugerida, confiança, descrição, coordenadas e revisão |
-| `confirmacoes` | Apoio por demanda, token, dia e distância, com restrição única por demanda, token e dia |
-| `eventos` | Transições de status, data e ator |
-| `historico_score` | Snapshots do score e dos componentes, com versão dos pesos |
-
-### Concorrência do SQLite
-
-- `journal_mode = WAL`, `foreign_keys = ON` e `busy_timeout = 5000`.
-- Uma conexão aberta e fechada por requisição.
-- `BEGIN IMMEDIATE` nas escritas que decidem agrupamento, confirmação e status.
-- Endpoints síncronos e um único worker.
-
-### Regras de confirmação
-
-- Raio de 200 metros em relação ao centroide.
-- Uma confirmação por dispositivo, por demanda, por dia.
-- Teto de 20 confirmações por demanda.
-- Confirmação repetida ou acima do teto retorna `409`; fora do raio retorna `400`.
-
-### Transições de status
-
-| De | Para |
-|---|---|
-| `aberta` | `em_analise`, `resolvida` |
-| `em_analise` | `em_execucao`, `resolvida`, `aberta` |
-| `em_execucao` | `resolvida`, `em_analise` |
-| `resolvida` | `aberta`, incrementando reaberturas |
-
-### Privacidade
-
-- Não há login, foto, IP armazenado ou identificação civil.
-- O token do cidadão é aleatório e local ao navegador.
-- As coordenadas retornadas pela API são arredondadas para três casas decimais.
-- O seed é sintético e determinístico.
-- O MVP não faz expurgo automático. Para uso real, é necessário revisar a LGPD e definir retenção.
-
-</details>
-
-## Decisões principais
+## Decisões
 
 - Stack mínima: FastAPI, SQLite e JavaScript puro, sem Node, ORM ou Docker.
-- Heap derivado na leitura para evitar ordenação obsoleta; snapshots ficam no histórico.
-- Grade de 0,002° como índice grosseiro e haversine como confirmação exata de 50 metros.
-- Score com componentes visíveis e pesos normalizados, em vez de um número opaco.
+- Heap derivado na leitura para evitar uma fila obsoleta; os snapshots ficam no histórico.
+- Grade de coordenadas como índice grosseiro e haversine como confirmação exata dos 50 metros.
+- Nota com componentes visíveis e pesos normalizados, em vez de um número opaco.
 - Fila FIFO separada para revisar classificações de baixa confiança.
 - Token simples de gestor e token local de cidadão, adequados ao escopo acadêmico.
 - Seed determinístico para demonstração e testes reproduzíveis.
