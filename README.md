@@ -4,7 +4,7 @@ Mapa colaborativo de problemas urbanos com fila de prioridade explicável.
 
 **Site:** [fila-urbana.onrender.com](https://fila-urbana.onrender.com)  
 **Documentação da API:** [fila-urbana.onrender.com/docs](https://fila-urbana.onrender.com/docs)  
-**Testes:** 74 passando  
+**Testes:** 75 passando  
 **Projeto acadêmico:** Estruturas de Dados e Algoritmos
 
 ![Mapa do Fila Urbana](docs/captura-mapa.jpg)
@@ -54,6 +54,7 @@ cd fila_urbana
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+export FILA_URBANA_TOKEN_GESTOR=escolha-um-token
 python scripts/semear.py --limpar
 uvicorn app.main:app --reload --workers 1
 ```
@@ -73,10 +74,10 @@ pytest
 
 O token é uma senha simples da equipe, não um login. Ele libera as ações de gestão, como mudar o status de uma demanda e concluir uma revisão. O cidadão não precisa dele para registrar ou confirmar problemas.
 
-- No servidor, o token fica na variável `FILA_URBANA_TOKEN_GESTOR`. O valor de demonstração é `gestor`.
-- No site, o campo **Token do gestor** fica no topo da página. A pessoa digita ali o mesmo valor configurado no servidor.
-- No Render, o caminho é **serviço → Environment → FILA_URBANA_TOKEN_GESTOR → editar → salvar e fazer deploy**.
-- Em uso real, troque `gestor` por um valor forte. O `render.yaml` é público, então o ideal é não guardar o segredo nele.
+- No servidor, o token fica na variável `FILA_URBANA_TOKEN_GESTOR` e não tem valor padrão. Sem essa variável, as ações de gestão ficam bloqueadas.
+- No site, o campo **Token do gestor** fica vazio no topo da página. A pessoa digita ali o mesmo valor configurado no servidor. O valor fica apenas na sessão do navegador.
+- No Render, o caminho é **serviço → Environment → FILA_URBANA_TOKEN_GESTOR → editar → salvar**. O `render.yaml` usa `sync: false`, então o segredo não fica no repositório e não é sobrescrito pelo Blueprint.
+- Em uso real, use um valor forte e exclusivo da equipe. O token é uma simplificação acadêmica; um sistema público precisaria de login, perfis e auditoria.
 
 ## Estrutura
 
@@ -180,7 +181,7 @@ O heap, a ordenação por intercalação e a busca binária foram implementados 
 pytest
 ```
 
-A suíte tem 74 testes:
+A suíte tem 75 testes:
 
 - `test_estruturas.py`: heap, FIFO, ordenação por intercalação e busca binária.
 - `test_classificacao.py`: palavras-chave, acentos, confiança e caso sem categoria.
@@ -200,7 +201,7 @@ O site está publicado no Render:
 - Configuração: `render.yaml`
 - Comando de build: `pip install -r requirements.txt`
 - Comando de start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1`
-- Variáveis: `FILA_URBANA_DB=data/fila_urbana.db`, `AUTO_SEED=1` e `FILA_URBANA_TOKEN_GESTOR`
+- Variáveis: `FILA_URBANA_DB=data/fila_urbana.db`, `AUTO_SEED=1` e `FILA_URBANA_TOKEN_GESTOR` (definida manualmente no painel, com `sync: false`)
 
 Com o auto-deploy ligado, cada push na branch `main` publica uma nova versão. Também é possível usar **Manual Deploy → Deploy latest commit** no painel do Render. O plano free usa disco efêmero: o SQLite pode ser recriado a cada deploy, reinício ou spin-down. Com `AUTO_SEED=1`, um banco vazio é semeado novamente, o que serve para demonstração. Para persistência real, seria necessário um disco persistente ou um banco gerenciado.
 

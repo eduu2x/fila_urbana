@@ -14,4 +14,4 @@ services:
       - key: AUTO_SEED
         value: "1"
       - key: FILA_URBANA_TOKEN_GESTOR
-        value: gestor
+        sync: false

@@ -56,7 +56,7 @@ app = FastAPI(
 
 
 def verificar_gestor(x_token_gestor: str = Header(default="")):
-    if x_token_gestor != TOKEN_GESTOR:
+    if not TOKEN_GESTOR or not x_token_gestor or x_token_gestor != TOKEN_GESTOR:
         raise HTTPException(
             status_code=401,
             detail="Token de gestor inválido.",

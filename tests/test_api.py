@@ -226,8 +226,23 @@ def test_status_exige_token(cliente):
     assert cliente.patch(
         f"/api/demandas/{identificador}/status",
         json=corpo,
+        headers={"X-Token-Gestor": ""},
+    ).status_code == 401
+    assert cliente.patch(
+        f"/api/demandas/{identificador}/status",
+        json=corpo,
         headers={"X-Token-Gestor": "errado"},
     ).status_code == 401
+
+
+def test_token_configurado_vazio_bloqueia(monkeypatch):
+    from fastapi import HTTPException
+
+    import app.main as modulo
+
+    monkeypatch.setattr(modulo, "TOKEN_GESTOR", "")
+    with pytest.raises(HTTPException):
+        modulo.verificar_gestor("")
 
 
 def test_fluxo_de_status(cliente):

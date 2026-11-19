@@ -101,10 +101,10 @@ function configurarAbas() {
 
 function configurarToken() {
   const campo = document.getElementById("token-gestor");
-  campo.value = sessionStorage.getItem("tokenGestor") || "gestor";
+  campo.value = sessionStorage.getItem("filaUrbanaTokenGestor") || "";
   atualizarAvisoToken();
   campo.addEventListener("input", () => {
-    sessionStorage.setItem("tokenGestor", campo.value);
+    sessionStorage.setItem("filaUrbanaTokenGestor", campo.value);
     atualizarAvisoToken();
   });
 }
@@ -113,7 +113,7 @@ function atualizarAvisoToken() {
   const campo = document.getElementById("token-gestor");
   const aviso = document.getElementById("aviso-token");
   aviso.textContent = campo.value.trim()
-    ? "Token salvo neste navegador"
+    ? "Token informado nesta sessão"
     : "Informe o token para ações de gestão";
 }
 
